@@ -457,10 +457,8 @@ char *yytext;
     yywrap(void) {
         return 1;
     }
-
-
-#line 463 "lex.yy.c"
-#line 464 "lex.yy.c"
+#line 461 "lex.yy.c"
+#line 462 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -677,10 +675,10 @@ YY_DECL
 		}
 
 	{
-#line 13 "mycalc.l"
+#line 11 "mycalc.l"
 
 
-#line 684 "lex.yy.c"
+#line 682 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -739,33 +737,33 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 15 "mycalc.l"
+#line 13 "mycalc.l"
 return        ADD;
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 16 "mycalc.l"
+#line 14 "mycalc.l"
 return        SUB;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 17 "mycalc.l"
+#line 15 "mycalc.l"
 return        MUL;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 18 "mycalc.l"
+#line 16 "mycalc.l"
 return        DIV;
 	YY_BREAK
 case 5:
 /* rule 5 can match eol */
 YY_RULE_SETUP
-#line 19 "mycalc.l"
+#line 17 "mycalc.l"
 return       CR;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 21 "mycalc.l"
+#line 19 "mycalc.l"
 {
     double temp;
     sscanf(yytext, "%lf", &temp);
@@ -775,22 +773,22 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 28 "mycalc.l"
+#line 26 "mycalc.l"
 
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 29 "mycalc.l"
+#line 27 "mycalc.l"
 {
     fprintf(stderr, "lexical error.\n");
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 32 "mycalc.l"
+#line 30 "mycalc.l"
 ECHO;
 	YY_BREAK
-#line 794 "lex.yy.c"
+#line 792 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1795,5 +1793,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 32 "mycalc.l"
+#line 30 "mycalc.l"
 

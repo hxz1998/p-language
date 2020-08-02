@@ -6,8 +6,6 @@
     yywrap(void) {
         return 1;
     }
-
-
 %}
 
 %%
