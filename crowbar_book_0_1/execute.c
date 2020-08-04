@@ -26,6 +26,25 @@ execute_expression_statement(CRB_Interpreter *inter, LocalEnvironment *env,
     return result;
 }
 
+/* 按照链表顺序来执行 execute_statement */
+StatementResult
+crb_execute_statement_list(CRB_Interpreter *inter, LocalEnvironment *env,
+                           StatementList *list)
+{
+    StatementList *pos;
+    StatementResult result;
+
+    result.type = NORMAL_STATEMENT_RESULT;
+    for (pos = list; pos; pos = pos->next)
+    {
+        result = execute_statement(inter, env, pos->statement);
+        if (result.type != NORMAL_STATEMENT_RESULT)
+            goto FUNC_END;
+    }
+
+FUNC_END:
+    return result;
+}
 static StatementResult
 execute_global_statement(CRB_Interpreter *inter, LocalEnvironment *env,
                          Statement *statement)
@@ -319,25 +338,5 @@ execute_statement(CRB_Interpreter *inter, LocalEnvironment *env,
         DBG_panic(("bad case...%d", statement->type));
     }
 
-    return result;
-}
-
-/* 按照链表顺序来执行 execute_statement */
-StatementResult
-crb_execute_statement_list(CRB_Interpreter *inter, LocalEnvironment *env,
-                           StatementList *list)
-{
-    StatementList *pos;
-    StatementResult result;
-
-    result.type = NORMAL_STATEMENT_RESULT;
-    for (pos = list; pos; pos = pos->next)
-    {
-        result = execute_statement(inter, env, pos->statement);
-        if (result.type != NORMAL_STATEMENT_RESULT)
-            goto FUNC_END;
-    }
-
-FUNC_END:
     return result;
 }

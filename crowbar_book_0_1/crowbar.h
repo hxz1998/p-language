@@ -313,7 +313,10 @@ struct CRB_Interpreter_tag
     StatementList *statement_list;
     int current_line_number;
 };
-
+/* execute.c */
+StatementResult
+crb_execute_statement_list(CRB_Interpreter *inter,
+                           LocalEnvironment *env, StatementList *list);
 /* create.c */
 void crb_function_define(char *identifier, ParameterList *parameter_list,
                          Block *block);
