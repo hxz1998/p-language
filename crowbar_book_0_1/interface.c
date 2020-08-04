@@ -35,8 +35,7 @@ CRB_create_interpreter(void)
     return interpreter;
 }
 
-void
-CRB_compile(CRB_Interpreter *interpreter, FILE *fp)
+void CRB_compile(CRB_Interpreter *interpreter, FILE *fp)
 {
     extern int yyparse(void);
     extern FILE *yyin;
@@ -44,7 +43,8 @@ CRB_compile(CRB_Interpreter *interpreter, FILE *fp)
     crb_set_current_interpreter(interpreter);
 
     yyin = fp;
-    if (yyparse()) {
+    if (yyparse())
+    {
         /* BUGBUG */
         fprintf(stderr, "Error ! Error ! Error !\n");
         exit(1);
@@ -52,40 +52,45 @@ CRB_compile(CRB_Interpreter *interpreter, FILE *fp)
     crb_reset_string_literal_buffer();
 }
 
-void
-CRB_interpret(CRB_Interpreter *interpreter)
+/* crowbar 程序的运行起点 */
+void CRB_interpret(CRB_Interpreter *interpreter)
 {
+    /* 准备所要用到的 MEM_Storage */
     interpreter->execute_storage = MEM_open_storage(0);
+    /* 注册全局变量 STDIN、STDOUT、STDERR */
     crb_add_std_fp(interpreter);
+    /* 将解释器中保存的语句链表按顺序执行 */
     crb_execute_statement_list(interpreter, NULL, interpreter->statement_list);
 }
 
 static void
-release_global_strings(CRB_Interpreter *interpreter) {
-    while (interpreter->variable) {
+release_global_strings(CRB_Interpreter *interpreter)
+{
+    while (interpreter->variable)
+    {
         Variable *temp = interpreter->variable;
         interpreter->variable = temp->next;
-        if (temp->value.type == CRB_STRING_VALUE) {
+        if (temp->value.type == CRB_STRING_VALUE)
+        {
             crb_release_string(temp->value.u.string_value);
         }
     }
 }
 
-void
-CRB_dispose_interpreter(CRB_Interpreter *interpreter)
+void CRB_dispose_interpreter(CRB_Interpreter *interpreter)
 {
     release_global_strings(interpreter);
 
-    if (interpreter->execute_storage) {
+    if (interpreter->execute_storage)
+    {
         MEM_dispose_storage(interpreter->execute_storage);
     }
 
     MEM_dispose_storage(interpreter->interpreter_storage);
 }
 
-void
-CRB_add_native_function(CRB_Interpreter *interpreter,
-                        char *name, CRB_NativeFunctionProc *proc)
+void CRB_add_native_function(CRB_Interpreter *interpreter,
+                             char *name, CRB_NativeFunctionProc *proc)
 {
     FunctionDefinition *fd;
 

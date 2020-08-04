@@ -22,9 +22,10 @@ typedef enum {
     CRB_NULL_VALUE
 } CRB_ValueType;
 
+/* 原生指针型 */
 typedef struct {
     CRB_NativePointerInfo       *info;
-    void                        *pointer;
+    void                        *pointer;   /* 设置成 void 可以指向任意类型 */
 } CRB_NativePointer;
 
 typedef struct {
@@ -34,7 +35,7 @@ typedef struct {
         int             int_value;
         double          double_value;
         CRB_String      *string_value;
-        CRB_NativePointer       native_pointer;
+        CRB_NativePointer       native_pointer; /* 原生指针 */
     } u;
 } CRB_Value;
 

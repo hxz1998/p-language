@@ -101,6 +101,7 @@ crb_chain_statement_list(StatementList *list, Statement *statement)
     return list;
 }
 
+/* 使用 crb_malloc() 函数开辟Expression的空间 */
 Expression *
 crb_alloc_expression(ExpressionType type)
 {
