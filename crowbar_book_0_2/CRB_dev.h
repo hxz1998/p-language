@@ -2,7 +2,8 @@
 #define PUBLIC_CRB_DEV_H_INCLUDED
 #include "CRB.h"
 
-typedef enum {
+typedef enum
+{
     CRB_FALSE = 0,
     CRB_TRUE = 1
 } CRB_Boolean;
@@ -12,11 +13,13 @@ typedef struct CRB_Array_tag CRB_Array;
 typedef struct CRB_String_tag CRB_String;
 typedef struct CRB_LocalEnvironment_tag CRB_LocalEnvironment;
 
-typedef struct {
-    char        *name;
+typedef struct
+{
+    char *name;
 } CRB_NativePointerInfo;
 
-typedef enum {
+typedef enum
+{
     CRB_BOOLEAN_VALUE = 1,
     CRB_INT_VALUE,
     CRB_DOUBLE_VALUE,
@@ -26,19 +29,21 @@ typedef enum {
     CRB_ARRAY_VALUE
 } CRB_ValueType;
 
-typedef struct {
-    CRB_NativePointerInfo       *info;
-    void                        *pointer;
+typedef struct
+{
+    CRB_NativePointerInfo *info;
+    void *pointer;
 } CRB_NativePointer;
 
-typedef struct {
-    CRB_ValueType       type;
+typedef struct
+{
+    CRB_ValueType type;
     union {
-        CRB_Boolean     boolean_value;
-        int             int_value;
-        double          double_value;
-        CRB_NativePointer       native_pointer;
-        CRB_Object      *object;
+        CRB_Boolean boolean_value;
+        int int_value;
+        double double_value;
+        CRB_NativePointer native_pointer;
+        CRB_Object *object;
     } u;
 } CRB_Value;
 

@@ -4,19 +4,21 @@
 #include "DBG.h"
 #include "crowbar.h"
 
+/* 创建对象前，要先检查 */
 static void
 check_gc(CRB_Interpreter *inter)
 {
 #if 0
     crb_garbage_collect(inter);
 #endif
-    if (inter->heap.current_heap_size > inter->heap.current_threshold) {
+    /* 如果当前的堆的大小已经大于了堆的阈值，那么就执行 GC */
+    if (inter->heap.current_heap_size > inter->heap.current_threshold)
+    {
         /* fprintf(stderr, "garbage collecting..."); */
         crb_garbage_collect(inter);
         /* fprintf(stderr, "done.\n"); */
 
-        inter->heap.current_threshold
-            = inter->heap.current_heap_size + HEAP_THRESHOLD_SIZE;
+        inter->heap.current_threshold = inter->heap.current_heap_size + HEAP_THRESHOLD_SIZE;
     }
 }
 
@@ -33,7 +35,8 @@ alloc_object(CRB_Interpreter *inter, ObjectType type)
     ret->prev = NULL;
     ret->next = inter->heap.header;
     inter->heap.header = ret;
-    if (ret->next) {
+    if (ret->next)
+    {
         ret->next->prev = ret;
     }
 
@@ -114,63 +117,69 @@ CRB_create_array(CRB_Interpreter *inter, CRB_LocalEnvironment *env,
     return ret;
 }
 
-void
-crb_array_add(CRB_Interpreter *inter, CRB_Object *obj, CRB_Value v)
+void crb_array_add(CRB_Interpreter *inter, CRB_Object *obj, CRB_Value v)
 {
     int new_size;
 
     DBG_assert(obj->type == ARRAY_OBJECT, ("bad type..%d\n", obj->type));
 
     check_gc(inter);
-    if (obj->u.array.size + 1 > obj->u.array.alloc_size) {
+    if (obj->u.array.size + 1 > obj->u.array.alloc_size)
+    {
         new_size = obj->u.array.alloc_size * 2;
-        if (new_size == 0
-            || new_size - obj->u.array.alloc_size > ARRAY_ALLOC_SIZE) {
+        if (new_size == 0 || new_size - obj->u.array.alloc_size > ARRAY_ALLOC_SIZE)
+        {
             new_size = obj->u.array.alloc_size + ARRAY_ALLOC_SIZE;
         }
         obj->u.array.array = MEM_realloc(obj->u.array.array,
                                          new_size * sizeof(CRB_Value));
-        inter->heap.current_heap_size
-            += (new_size - obj->u.array.alloc_size) * sizeof(CRB_Value);
+        inter->heap.current_heap_size += (new_size - obj->u.array.alloc_size) * sizeof(CRB_Value);
         obj->u.array.alloc_size = new_size;
     }
     obj->u.array.array[obj->u.array.size] = v;
     obj->u.array.size++;
 }
 
-void
-crb_array_resize(CRB_Interpreter *inter, CRB_Object *obj, int new_size)
+void crb_array_resize(CRB_Interpreter *inter, CRB_Object *obj, int new_size)
 {
     int new_alloc_size;
     CRB_Boolean need_realloc;
     int i;
 
     check_gc(inter);
-    
-    if (new_size > obj->u.array.alloc_size) {
+
+    if (new_size > obj->u.array.alloc_size)
+    {
         new_alloc_size = obj->u.array.alloc_size * 2;
-        if (new_alloc_size < new_size) {
+        if (new_alloc_size < new_size)
+        {
             new_alloc_size = new_size + ARRAY_ALLOC_SIZE;
-        } else if (new_alloc_size - obj->u.array.alloc_size
-                   > ARRAY_ALLOC_SIZE) {
+        }
+        else if (new_alloc_size - obj->u.array.alloc_size > ARRAY_ALLOC_SIZE)
+        {
             new_alloc_size = obj->u.array.alloc_size + ARRAY_ALLOC_SIZE;
         }
         need_realloc = CRB_TRUE;
-    } else if (obj->u.array.alloc_size - new_size > ARRAY_ALLOC_SIZE) {
+    }
+    else if (obj->u.array.alloc_size - new_size > ARRAY_ALLOC_SIZE)
+    {
         new_alloc_size = new_size;
         need_realloc = CRB_TRUE;
-    } else {
+    }
+    else
+    {
         need_realloc = CRB_FALSE;
     }
-    if (need_realloc) {
+    if (need_realloc)
+    {
         check_gc(inter);
         obj->u.array.array = MEM_realloc(obj->u.array.array,
                                          new_alloc_size * sizeof(CRB_Value));
-        inter->heap.current_heap_size
-            += (new_alloc_size - obj->u.array.alloc_size) * sizeof(CRB_Value);
+        inter->heap.current_heap_size += (new_alloc_size - obj->u.array.alloc_size) * sizeof(CRB_Value);
         obj->u.array.alloc_size = new_alloc_size;
     }
-    for (i = obj->u.array.size; i < new_size; i++) {
+    for (i = obj->u.array.size; i < new_size; i++)
+    {
         obj->u.array.array[i].type = CRB_NULL_VALUE;
     }
     obj->u.array.size = new_size;
@@ -179,15 +188,21 @@ crb_array_resize(CRB_Interpreter *inter, CRB_Object *obj, int new_size)
 static void
 gc_mark(CRB_Object *obj)
 {
+    /* 如果对象已经被标记了，那么就直接返回 */
     if (obj->marked)
         return;
 
     obj->marked = CRB_TRUE;
 
-    if (obj->type == ARRAY_OBJECT) {
+    /* 如果是数组类型，那么就挨个标记 */
+    if (obj->type == ARRAY_OBJECT)
+    {
         int i;
-        for (i = 0; i < obj->u.array.size; i++) {
-            if (dkc_is_object_value(obj->u.array.array[i].type)) {
+        for (i = 0; i < obj->u.array.size; i++)
+        {
+            if (dkc_is_object_value(obj->u.array.array[i].type))
+            {
+                /* 递归标记 */
                 gc_mark(obj->u.array.array[i].u.object);
             }
         }
@@ -205,7 +220,8 @@ gc_mark_ref_in_native_method(CRB_LocalEnvironment *env)
 {
     RefInNativeFunc *ref;
 
-    for (ref = env->ref_in_native_method; ref; ref = ref->next) {
+    for (ref = env->ref_in_native_method; ref; ref = ref->next)
+    {
         gc_mark(ref->object);
     }
 }
@@ -218,27 +234,39 @@ gc_mark_objects(CRB_Interpreter *inter)
     CRB_LocalEnvironment *lv;
     int i;
 
-    for (obj = inter->heap.header; obj; obj = obj->next) {
+    /* 清除所有标记 */
+    for (obj = inter->heap.header; obj; obj = obj->next)
+    {
         gc_reset_mark(obj);
     }
-    
-    for (v = inter->variable; v; v = v->next) {
-        if (dkc_is_object_value(v->value.type)) {
+
+    /* 全局变量 */
+    for (v = inter->variable; v; v = v->next)
+    {
+        if (dkc_is_object_value(v->value.type))
+        {
             gc_mark(v->value.u.object);
         }
     }
-    
-    for (lv = inter->top_environment; lv; lv = lv->next) {
-        for (v = lv->variable; v; v = v->next) {
-            if (dkc_is_object_value(v->value.type)) {
+
+    /* 局部变量 */
+    for (lv = inter->top_environment; lv; lv = lv->next)
+    {
+        for (v = lv->variable; v; v = v->next)
+        {
+            if (dkc_is_object_value(v->value.type))
+            {
                 gc_mark(v->value.u.object);
             }
         }
         gc_mark_ref_in_native_method(lv);
     }
 
-    for (i = 0; i < inter->stack.stack_pointer; i++) {
-        if (dkc_is_object_value(inter->stack.stack[i].type)) {
+    /* crowbar 栈 */
+    for (i = 0; i < inter->stack.stack_pointer; i++)
+    {
+        if (dkc_is_object_value(inter->stack.stack[i].type))
+        {
             gc_mark(inter->stack.stack[i].u.object);
         }
     }
@@ -247,14 +275,15 @@ gc_mark_objects(CRB_Interpreter *inter)
 static void
 gc_dispose_object(CRB_Interpreter *inter, CRB_Object *obj)
 {
-    switch (obj->type) {
+    switch (obj->type)
+    {
     case ARRAY_OBJECT:
-        inter->heap.current_heap_size
-            -= sizeof(CRB_Value) * obj->u.array.alloc_size;
+        inter->heap.current_heap_size -= sizeof(CRB_Value) * obj->u.array.alloc_size;
         MEM_free(obj->u.array.array);
         break;
     case STRING_OBJECT:
-        if (!obj->u.string.is_literal) {
+        if (!obj->u.string.is_literal)
+        {
             inter->heap.current_heap_size -= strlen(obj->u.string.string) + 1;
             MEM_free(obj->u.string.string);
         }
@@ -267,34 +296,42 @@ gc_dispose_object(CRB_Interpreter *inter, CRB_Object *obj)
     MEM_free(obj);
 }
 
+/* 清除阶段 */
 static void
 gc_sweep_objects(CRB_Interpreter *inter)
 {
     CRB_Object *obj;
     CRB_Object *tmp;
 
-    for (obj = inter->heap.header; obj; ) {
-        if (!obj->marked) {
-            if (obj->prev) {
+    for (obj = inter->heap.header; obj;)
+    {
+        if (!obj->marked)
+        {
+            if (obj->prev)
+            {
                 obj->prev->next = obj->next;
-            } else {
+            }
+            else
+            {
                 inter->heap.header = obj->next;
             }
-            if (obj->next) {
+            if (obj->next)
+            {
                 obj->next->prev = obj->prev;
             }
             tmp = obj->next;
             gc_dispose_object(inter, obj);
             obj = tmp;
-        } else {
+        }
+        else
+        {
             obj = obj->next;
         }
     }
 }
 
-void
-crb_garbage_collect(CRB_Interpreter *inter)
+void crb_garbage_collect(CRB_Interpreter *inter)
 {
-    gc_mark_objects(inter);
-    gc_sweep_objects(inter);
+    gc_mark_objects(inter);     /* 标记过程 */
+    gc_sweep_objects(inter);    /* 清除过程 */
 }
