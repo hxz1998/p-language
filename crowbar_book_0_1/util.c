@@ -12,7 +12,8 @@ crb_get_current_interpreter(void)
     return st_current_interpreter;
 }
 
-void crb_set_current_interpreter(CRB_Interpreter *inter)
+void
+crb_set_current_interpreter(CRB_Interpreter *inter)
 {
     st_current_interpreter = inter;
 }
@@ -42,8 +43,7 @@ crb_search_function(char *name)
     CRB_Interpreter *inter;
 
     inter = crb_get_current_interpreter();
-    for (pos = inter->function_list; pos; pos = pos->next)
-    {
+    for (pos = inter->function_list; pos; pos = pos->next) {
         if (!strcmp(pos->name, name))
             break;
     }
@@ -75,21 +75,17 @@ crb_execute_malloc(CRB_Interpreter *inter, size_t size)
 Variable *
 crb_search_local_variable(LocalEnvironment *env, char *identifier)
 {
-    Variable *pos;
+    Variable    *pos;
 
     if (env == NULL)
         return NULL;
-    for (pos = env->variable; pos; pos = pos->next)
-    {
+    for (pos = env->variable; pos; pos = pos->next) {
         if (!strcmp(pos->name, identifier))
             break;
     }
-    if (pos == NULL)
-    {
+    if (pos == NULL) {
         return NULL;
-    }
-    else
-    {
+    } else {
         return pos;
     }
 }
@@ -97,10 +93,9 @@ crb_search_local_variable(LocalEnvironment *env, char *identifier)
 Variable *
 crb_search_global_variable(CRB_Interpreter *inter, char *identifier)
 {
-    Variable *pos;
+    Variable    *pos;
 
-    for (pos = inter->variable; pos; pos = pos->next)
-    {
+    for (pos = inter->variable; pos; pos = pos->next) {
         if (!strcmp(pos->name, identifier))
             return pos;
     }
@@ -108,10 +103,11 @@ crb_search_global_variable(CRB_Interpreter *inter, char *identifier)
     return NULL;
 }
 
-void crb_add_local_variable(LocalEnvironment *env,
-                            char *identifier, CRB_Value *value)
+void
+crb_add_local_variable(LocalEnvironment *env,
+                       char *identifier, CRB_Value *value)
 {
-    Variable *new_variable;
+    Variable    *new_variable;
 
     new_variable = MEM_malloc(sizeof(Variable));
     new_variable->name = identifier;
@@ -120,10 +116,11 @@ void crb_add_local_variable(LocalEnvironment *env,
     env->variable = new_variable;
 }
 
-void CRB_add_global_variable(CRB_Interpreter *inter, char *identifier,
-                             CRB_Value *value)
+void
+CRB_add_global_variable(CRB_Interpreter *inter, char *identifier,
+                        CRB_Value *value)
 {
-    Variable *new_variable;
+    Variable    *new_variable;
 
     new_variable = crb_execute_malloc(inter, sizeof(Variable));
     new_variable->name = crb_execute_malloc(inter, strlen(identifier) + 1);
@@ -136,14 +133,13 @@ void CRB_add_global_variable(CRB_Interpreter *inter, char *identifier,
 char *
 crb_get_operator_string(ExpressionType type)
 {
-    char *str;
+    char        *str;
 
-    switch (type)
-    {
-    case BOOLEAN_EXPRESSION: /* FALLTHRU */
-    case INT_EXPRESSION:     /* FALLTHRU */
-    case DOUBLE_EXPRESSION:  /* FALLTHRU */
-    case STRING_EXPRESSION:  /* FALLTHRU */
+    switch (type) {
+    case BOOLEAN_EXPRESSION:    /* FALLTHRU */
+    case INT_EXPRESSION:        /* FALLTHRU */
+    case DOUBLE_EXPRESSION:     /* FALLTHRU */
+    case STRING_EXPRESSION:     /* FALLTHRU */
     case IDENTIFIER_EXPRESSION:
         DBG_panic(("bad expression type..%d\n", type));
         break;
@@ -192,8 +188,8 @@ crb_get_operator_string(ExpressionType type)
     case MINUS_EXPRESSION:
         str = "-";
         break;
-    case FUNCTION_CALL_EXPRESSION: /* FALLTHRU */
-    case NULL_EXPRESSION:          /* FALLTHRU */
+    case FUNCTION_CALL_EXPRESSION:  /* FALLTHRU */
+    case NULL_EXPRESSION:  /* FALLTHRU */
     case EXPRESSION_TYPE_COUNT_PLUS_1:
     default:
         DBG_panic(("bad expression type..%d\n", type));

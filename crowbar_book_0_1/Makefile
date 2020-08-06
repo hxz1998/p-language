@@ -1,5 +1,4 @@
 TARGET = crowbar
-CC=gcc
 OBJS = \
   lex.yy.o\
   y.tab.o\
@@ -26,11 +25,11 @@ $(TARGET):$(OBJS)
 clean:
 	rm -f *.o lex.yy.c y.tab.c y.tab.h *~
 y.tab.h : crowbar.y
-	bison --yacc -dv crowbar.y
+	yacc -dv crowbar.y
 y.tab.c : crowbar.y
-	bison --yacc -dv crowbar.y
+	yacc -dv crowbar.y
 lex.yy.c : crowbar.l crowbar.y y.tab.h
-	flex crowbar.l
+	lex crowbar.l
 y.tab.o: y.tab.c crowbar.h MEM.h
 	$(CC) -c -g $*.c $(INCLUDES)
 lex.yy.o: lex.yy.c crowbar.h MEM.h

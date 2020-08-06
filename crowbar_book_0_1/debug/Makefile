@@ -1,5 +1,4 @@
 TARGET = dbg.o
-CC=gcc
 CFLAGS = -c -g -Wall -DDBG_NO_DEBUG -ansi -pedantic
 OBJS = debug.o
 INCLUDES = -I..

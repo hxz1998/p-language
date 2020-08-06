@@ -2,19 +2,21 @@
 #include "DBG.h"
 #include "crowbar.h"
 
-void
-crb_function_define(char *identifier, ParameterList *parameter_list,
-                    Block *block)
+/* 函数定义， 参数分别是 标识符、参数列表、执行块 */
+void crb_function_define(char *identifier, ParameterList *parameter_list,
+                         Block *block)
 {
     FunctionDefinition *f;
     CRB_Interpreter *inter;
 
-    if (crb_search_function(identifier)) {
+    if (crb_search_function(identifier))
+    {
         crb_compile_error(FUNCTION_MULTIPLE_DEFINE_ERR,
                           STRING_MESSAGE_ARGUMENT, "name", identifier,
                           MESSAGE_ARGUMENT_END);
         return;
     }
+    /* 获取到解释器 */
     inter = crb_get_current_interpreter();
 
     f = crb_malloc(sizeof(FunctionDefinition));
@@ -26,10 +28,11 @@ crb_function_define(char *identifier, ParameterList *parameter_list,
     inter->function_list = f;
 }
 
+/* 创建参数 */
 ParameterList *
 crb_create_parameter(char *identifier)
 {
-    ParameterList       *p;
+    ParameterList *p;
 
     p = crb_malloc(sizeof(ParameterList));
     p->name = identifier;
@@ -100,12 +103,11 @@ crb_chain_statement_list(StatementList *list, Statement *statement)
 
     return list;
 }
-
-/* 使用 crb_malloc() 函数开辟Expression的空间 */
+/* 使用 crb_malloc() 开辟Expression空间 */
 Expression *
 crb_alloc_expression(ExpressionType type)
 {
-    Expression  *exp;
+    Expression *exp;
 
     exp = crb_malloc(sizeof(Expression));
     exp->type = type;
@@ -129,15 +131,20 @@ crb_create_assign_expression(char *variable, Expression *operand)
 static Expression
 convert_value_to_expression(CRB_Value *v)
 {
-    Expression  expr;
+    Expression expr;
 
-    if (v->type == CRB_INT_VALUE) {
+    if (v->type == CRB_INT_VALUE)
+    {
         expr.type = INT_EXPRESSION;
         expr.u.int_value = v->u.int_value;
-    } else if (v->type == CRB_DOUBLE_VALUE) {
+    }
+    else if (v->type == CRB_DOUBLE_VALUE)
+    {
         expr.type = DOUBLE_EXPRESSION;
         expr.u.double_value = v->u.double_value;
-    } else {
+    }
+    else
+    {
         DBG_assert(v->type == CRB_BOOLEAN_VALUE,
                    ("v->type..%d\n", v->type));
         expr.type = BOOLEAN_EXPRESSION;
@@ -146,14 +153,13 @@ convert_value_to_expression(CRB_Value *v)
     return expr;
 }
 
+/* 二元运算 */
 Expression *
 crb_create_binary_expression(ExpressionType operator,
                              Expression *left, Expression *right)
 {
-    if ((left->type == INT_EXPRESSION
-         || left->type == DOUBLE_EXPRESSION)
-        && (right->type == INT_EXPRESSION
-            || right->type == DOUBLE_EXPRESSION)) {
+    if ((left->type == INT_EXPRESSION || left->type == DOUBLE_EXPRESSION) && (right->type == INT_EXPRESSION || right->type == DOUBLE_EXPRESSION))
+    {
         CRB_Value v;
         v = crb_eval_binary_expression(crb_get_current_interpreter(),
                                        NULL, operator, left, right);
@@ -161,7 +167,9 @@ crb_create_binary_expression(ExpressionType operator,
         *left = convert_value_to_expression(&v);
 
         return left;
-    } else {
+    }
+    else
+    {
         Expression *exp;
         exp = crb_alloc_expression(operator);
         exp->u.binary_expression.left = left;
@@ -173,16 +181,18 @@ crb_create_binary_expression(ExpressionType operator,
 Expression *
 crb_create_minus_expression(Expression *operand)
 {
-    if (operand->type == INT_EXPRESSION
-        || operand->type == DOUBLE_EXPRESSION) {
-        CRB_Value       v;
+    if (operand->type == INT_EXPRESSION || operand->type == DOUBLE_EXPRESSION)
+    {
+        CRB_Value v;
         v = crb_eval_minus_expression(crb_get_current_interpreter(),
                                       NULL, operand);
         /* Notice! Overwriting operand expression. */
         *operand = convert_value_to_expression(&v);
         return operand;
-    } else {
-        Expression      *exp;
+    }
+    else
+    {
+        Expression *exp;
         exp = crb_alloc_expression(MINUS_EXPRESSION);
         exp->u.minus_expression = operand;
         return exp;
@@ -192,7 +202,7 @@ crb_create_minus_expression(Expression *operand)
 Expression *
 crb_create_identifier_expression(char *identifier)
 {
-    Expression  *exp;
+    Expression *exp;
 
     exp = crb_alloc_expression(IDENTIFIER_EXPRESSION);
     exp->u.identifier = identifier;
@@ -203,7 +213,7 @@ crb_create_identifier_expression(char *identifier)
 Expression *
 crb_create_function_call_expression(char *func_name, ArgumentList *argument)
 {
-    Expression  *exp;
+    Expression *exp;
 
     exp = crb_alloc_expression(FUNCTION_CALL_EXPRESSION);
     exp->u.function_call_expression.identifier = func_name;
@@ -226,7 +236,7 @@ crb_create_boolean_expression(CRB_Boolean value)
 Expression *
 crb_create_null_expression(void)
 {
-    Expression  *exp;
+    Expression *exp;
 
     exp = crb_alloc_expression(NULL_EXPRESSION);
 
@@ -259,7 +269,7 @@ crb_create_global_statement(IdentifierList *identifier_list)
 IdentifierList *
 crb_create_global_identifier(char *identifier)
 {
-    IdentifierList      *i_list;
+    IdentifierList *i_list;
 
     i_list = crb_malloc(sizeof(IdentifierList));
     i_list->name = identifier;
@@ -390,4 +400,3 @@ Statement *crb_create_continue_statement(void)
 {
     return alloc_statement(CONTINUE_STATEMENT);
 }
-

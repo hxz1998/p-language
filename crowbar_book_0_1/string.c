@@ -3,40 +3,42 @@
 #include "MEM.h"
 #include "crowbar.h"
 
-#define STRING_ALLOC_SIZE (256)
+#define STRING_ALLOC_SIZE       (256)
 
 static char *st_string_literal_buffer = NULL;
 static int st_string_literal_buffer_size = 0;
 static int st_string_literal_buffer_alloc_size = 0;
 
-/* 开始一段字符串处理 */
-void crb_open_string_literal(void)
+void
+crb_open_string_literal(void)
 {
     st_string_literal_buffer_size = 0;
 }
 
-/* 追加字符串 */
-void crb_add_string_literal(int letter)
+void
+crb_add_string_literal(int letter)
 {
-    if (st_string_literal_buffer_size == st_string_literal_buffer_alloc_size)
-    {
+    if (st_string_literal_buffer_size == st_string_literal_buffer_alloc_size) {
         st_string_literal_buffer_alloc_size += STRING_ALLOC_SIZE;
-        st_string_literal_buffer = MEM_realloc(st_string_literal_buffer,
-                                               st_string_literal_buffer_alloc_size);
+        st_string_literal_buffer
+            = MEM_realloc(st_string_literal_buffer,
+                          st_string_literal_buffer_alloc_size);
     }
     st_string_literal_buffer[st_string_literal_buffer_size] = letter;
     st_string_literal_buffer_size++;
 }
 
-void crb_reset_string_literal_buffer(void)
+void
+crb_reset_string_literal_buffer(void)
 {
     MEM_free(st_string_literal_buffer);
     st_string_literal_buffer = NULL;
     st_string_literal_buffer_size = 0;
     st_string_literal_buffer_alloc_size = 0;
 }
-/* 结束一段字符串的处理 */
-char *crb_close_string_literal(void)
+
+char *
+crb_close_string_literal(void)
 {
     char *new_str;
 
@@ -48,7 +50,8 @@ char *crb_close_string_literal(void)
     return new_str;
 }
 
-char *crb_create_identifier(char *str)
+char *
+crb_create_identifier(char *str)
 {
     char *new_str;
 
@@ -58,3 +61,4 @@ char *crb_create_identifier(char *str)
 
     return new_str;
 }
+

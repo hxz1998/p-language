@@ -1,5 +1,4 @@
 TARGET = mem.o
-CC=gcc
 CFLAGS = -c -g -DDEBUG -Wall -ansi -pedantic
 OBJS = memory.o storage.o
 

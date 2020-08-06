@@ -4,7 +4,7 @@
 #include "DBG.h"
 #include "crowbar.h"
 
-
+/* 求布尔类型表达式结果 */
 static CRB_Value
 eval_boolean_expression(CRB_Boolean boolean_value)
 {
@@ -676,13 +676,6 @@ eval_function_call_expression(CRB_Interpreter *inter, LocalEnvironment *env,
     return value;
 }
 
-CRB_Value
-crb_eval_expression(CRB_Interpreter *inter, LocalEnvironment *env,
-                    Expression *expr)
-{
-    return eval_expression(inter, env, expr);
-}
-
 static CRB_Value
 eval_expression(CRB_Interpreter *inter, LocalEnvironment *env,
                 Expression *expr)
@@ -745,4 +738,11 @@ eval_expression(CRB_Interpreter *inter, LocalEnvironment *env,
         DBG_panic(("bad case. type..%d\n", expr->type));
     }
     return v;
+}
+
+CRB_Value
+crb_eval_expression(CRB_Interpreter *inter, LocalEnvironment *env,
+                    Expression *expr)
+{
+    return eval_expression(inter, env, expr);
 }

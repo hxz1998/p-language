@@ -52,14 +52,14 @@ void CRB_compile(CRB_Interpreter *interpreter, FILE *fp)
     crb_reset_string_literal_buffer();
 }
 
-/* crowbar 程序的运行起点 */
+/* 解释器开始的起点 */
 void CRB_interpret(CRB_Interpreter *interpreter)
 {
-    /* 准备所要用到的 MEM_Storage */
+    /* 准备所用到的 MEM_storage */
     interpreter->execute_storage = MEM_open_storage(0);
-    /* 注册全局变量 STDIN、STDOUT、STDERR */
+    /* 注册解释器参数 stderr/stdin/stdout */
     crb_add_std_fp(interpreter);
-    /* 将解释器中保存的语句链表按顺序执行 */
+    /* 开始一句一句来执行语句 */
     crb_execute_statement_list(interpreter, NULL, interpreter->statement_list);
 }
 

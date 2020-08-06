@@ -63,28 +63,28 @@ typedef struct Expression_tag Expression;
 /* 表达式的类型 */
 typedef enum
 {
-    BOOLEAN_EXPRESSION = 1, /* 布尔型常量 */
-    INT_EXPRESSION,         /* 整数型常量 */
-    DOUBLE_EXPRESSION,      /* 实数型常量 */
-    STRING_EXPRESSION,      /* 字符串型常量 */
-    IDENTIFIER_EXPRESSION,  /* 变量 */
-    ASSIGN_EXPRESSION,      /* 赋值表达式 */
-    ADD_EXPRESSION,         /* 加减乘除表达式  */
+    BOOLEAN_EXPRESSION = 1, /* 布尔常量 */
+    INT_EXPRESSION,
+    DOUBLE_EXPRESSION,
+    STRING_EXPRESSION,
+    IDENTIFIER_EXPRESSION,
+    ASSIGN_EXPRESSION,
+    ADD_EXPRESSION,
     SUB_EXPRESSION,
     MUL_EXPRESSION,
     DIV_EXPRESSION,
-    MOD_EXPRESSION,         /* 求余表达式 */
-    EQ_EXPRESSION,          /* == */
-    NE_EXPRESSION,          /* ！= */
-    GT_EXPRESSION,          /* > */
-    GE_EXPRESSION,          /* >= */
-    LT_EXPRESSION,          /* < */
-    LE_EXPRESSION,          /* <= */ 
-    LOGICAL_AND_EXPRESSION, /* && */
-    LOGICAL_OR_EXPRESSION,  /* || */
-    MINUS_EXPRESSION,       /* 单目取负 */
+    MOD_EXPRESSION,
+    EQ_EXPRESSION,
+    NE_EXPRESSION,
+    GT_EXPRESSION,
+    GE_EXPRESSION,
+    LT_EXPRESSION,
+    LE_EXPRESSION,
+    LOGICAL_AND_EXPRESSION,
+    LOGICAL_OR_EXPRESSION,
+    MINUS_EXPRESSION,
     FUNCTION_CALL_EXPRESSION,
-    NULL_EXPRESSION, /* null 表达式  */
+    NULL_EXPRESSION,
     EXPRESSION_TYPE_COUNT_PLUS_1
 } ExpressionType;
 
@@ -180,8 +180,8 @@ typedef struct
 
 typedef struct
 {
-    Expression *condition;  /* 条件表达式 */
-    Block *block;           /* 可执行块 */
+    Expression *condition;
+    Block *block;
 } WhileStatement;
 
 typedef struct
@@ -210,21 +210,22 @@ typedef enum
     STATEMENT_TYPE_COUNT_PLUS_1
 } StatementType;
 
-/* 构建语句的思路 */
+/* 构建语句 */
 struct Statement_tag
 {
-    StatementType type;
-    int line_number;
+    StatementType type;             /* 语句类型 */
+    int line_number;                /* 语句所在行 */
     union {
-        Expression *expression_s;   /* 表达式语句 */
-        GlobalStatement global_s;   /* global 语句 */
-        IfStatement if_s;           /* if 语句 */
-        WhileStatement while_s;     /* while 语句 */
-        ForStatement for_s;         /* for 语句 */
-        ReturnStatement return_s;   /* return 语句 */
+        Expression *expression_s;
+        GlobalStatement global_s;
+        IfStatement if_s;
+        WhileStatement while_s;
+        ForStatement for_s;
+        ReturnStatement return_s;
     } u;
 };
 
+/* 参数链表 */
 typedef struct ParameterList_tag
 {
     char *name;
@@ -287,8 +288,8 @@ typedef struct GlobalVariableRef_tag
 
 typedef struct
 {
-    Variable *variable;                 /* 保存局部变量的链表 */
-    GlobalVariableRef *global_variable; /* 根据global语句生成的引用全局变量的链表 */
+    Variable *variable;                 /* 变量链表 */
+    GlobalVariableRef *global_variable; /* 全局变量链表 */
 } LocalEnvironment;
 
 struct CRB_String_tag
@@ -313,10 +314,7 @@ struct CRB_Interpreter_tag
     StatementList *statement_list;
     int current_line_number;
 };
-/* execute.c */
-StatementResult
-crb_execute_statement_list(CRB_Interpreter *inter,
-                           LocalEnvironment *env, StatementList *list);
+
 /* create.c */
 void crb_function_define(char *identifier, ParameterList *parameter_list,
                          Block *block);
@@ -329,7 +327,47 @@ StatementList *crb_create_statement_list(Statement *statement);
 StatementList *crb_chain_statement_list(StatementList *list,
                                         Statement *statement);
 Expression *crb_alloc_expression(ExpressionType type);
+Expression *crb_create_assign_expression(char *variable,
+                                         Expression *operand);
+Expression *crb_create_binary_expression(ExpressionType operator,
+                                         Expression *left,
+                                         Expression *right);
+Expression *crb_create_minus_expression(Expression *operand);
+Expression *crb_create_identifier_expression(char *identifier);
+Expression *crb_create_function_call_expression(char *func_name,
+                                                ArgumentList *argument);
+Expression *crb_create_boolean_expression(CRB_Boolean value);
+Expression *crb_create_null_expression(void);
+Statement *crb_create_global_statement(IdentifierList *identifier_list);
+IdentifierList *crb_create_global_identifier(char *identifier);
+IdentifierList *crb_chain_identifier(IdentifierList *list, char *identifier);
+Statement *crb_create_if_statement(Expression *condition,
+                                   Block *then_block, Elsif *elsif_list,
+                                   Block *else_block);
+Elsif *crb_chain_elsif_list(Elsif *list, Elsif *add);
+Elsif *crb_create_elsif(Expression *expr, Block *block);
+Statement *crb_create_while_statement(Expression *condition, Block *block);
+Statement *crb_create_for_statement(Expression *init, Expression *cond,
+                                    Expression *post, Block *block);
+Block *crb_create_block(StatementList *statement_list);
+Statement *crb_create_expression_statement(Expression *expression);
+Statement *crb_create_return_statement(Expression *expression);
+Statement *crb_create_break_statement(void);
+Statement *crb_create_continue_statement(void);
 
+/* string.c */
+char *crb_create_identifier(char *str);
+void crb_open_string_literal(void);
+void crb_add_string_literal(int letter);
+void crb_reset_string_literal_buffer(void);
+char *crb_close_string_literal(void);
+
+/* execute.c */
+StatementResult
+crb_execute_statement_list(CRB_Interpreter *inter,
+                           LocalEnvironment *env, StatementList *list);
+
+/* eval.c */
 CRB_Value crb_eval_binary_expression(CRB_Interpreter *inter,
                                      LocalEnvironment *env,
                                      ExpressionType operator,

@@ -26,25 +26,7 @@ execute_expression_statement(CRB_Interpreter *inter, LocalEnvironment *env,
     return result;
 }
 
-/* 按照链表顺序来执行 execute_statement */
-StatementResult
-crb_execute_statement_list(CRB_Interpreter *inter, LocalEnvironment *env,
-                           StatementList *list)
-{
-    StatementList *pos;
-    StatementResult result;
-
-    result.type = NORMAL_STATEMENT_RESULT;
-    for (pos = list; pos; pos = pos->next)
-    {
-        result = execute_statement(inter, env, pos->statement);
-        if (result.type != NORMAL_STATEMENT_RESULT)
-            goto FUNC_END;
-    }
-
-FUNC_END:
-    return result;
-}
+/* 按照链表顺序来执行，并获取到返回结果 */
 static StatementResult
 execute_global_statement(CRB_Interpreter *inter, LocalEnvironment *env,
                          Statement *statement)
@@ -170,10 +152,8 @@ execute_while_statement(CRB_Interpreter *inter, LocalEnvironment *env,
     CRB_Value cond;
 
     result.type = NORMAL_STATEMENT_RESULT;
-    /* 首先是一个无限循环 */
     for (;;)
     {
-        /* 通过条件语句判别 */
         cond = crb_eval_expression(inter, env, statement->u.while_s.condition);
         if (cond.type != CRB_BOOLEAN_VALUE)
         {
@@ -182,14 +162,13 @@ execute_while_statement(CRB_Interpreter *inter, LocalEnvironment *env,
         }
         DBG_assert(cond.type == CRB_BOOLEAN_VALUE,
                    ("cond.type..%d", cond.type));
-        /* 条件为真，则结束循环 */
-        if (!cond.u.boolean_value)
+        if (!cond.u.boolean_value) /* 条件为真，循环结束 */
             break;
-        /* 条件不为真，则执行内部语句 */
+
+        /* 获取到语句执行的结果 */
         result = crb_execute_statement_list(inter, env,
                                             statement->u.while_s.block
                                                 ->statement_list);
-        /* return、break、continue的处理 */
         if (result.type == RETURN_STATEMENT_RESULT)
         {
             break;
@@ -264,7 +243,6 @@ execute_return_statement(CRB_Interpreter *inter, LocalEnvironment *env,
     result.type = RETURN_STATEMENT_RESULT;
     if (statement->u.return_s.return_value)
     {
-        /* 放置返回值 */
         result.u.return_value = crb_eval_expression(inter, env,
                                                     statement->u.return_s.return_value);
     }
@@ -298,7 +276,6 @@ execute_continue_statement(CRB_Interpreter *inter, LocalEnvironment *env,
     return result;
 }
 
-/* 执行语句的具体程序，第二个参数要传递的是当前运行中函数的局部变量。如果函数没有运行，那么就传递 NULL */
 static StatementResult
 execute_statement(CRB_Interpreter *inter, LocalEnvironment *env,
                   Statement *statement)
@@ -338,5 +315,24 @@ execute_statement(CRB_Interpreter *inter, LocalEnvironment *env,
         DBG_panic(("bad case...%d", statement->type));
     }
 
+    return result;
+}
+
+StatementResult
+crb_execute_statement_list(CRB_Interpreter *inter, LocalEnvironment *env,
+                           StatementList *list)
+{
+    StatementList *pos;
+    StatementResult result;
+
+    result.type = NORMAL_STATEMENT_RESULT;
+    for (pos = list; pos; pos = pos->next)
+    {
+        result = execute_statement(inter, env, pos->statement);
+        if (result.type != NORMAL_STATEMENT_RESULT)
+            goto FUNC_END;
+    }
+
+FUNC_END:
     return result;
 }
