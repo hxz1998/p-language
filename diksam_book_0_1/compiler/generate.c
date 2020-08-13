@@ -22,7 +22,7 @@ typedef struct
     DVM_Byte *code;
     int label_table_size;
     int label_table_alloc_size;
-    LabelTable *label_table;
+    LabelTable *label_table;    /* 标签对应表 */
     int line_number_size;
     DVM_LineNumber *line_number;
 } OpcodeBuf;
@@ -184,6 +184,7 @@ add_line_number(OpcodeBuf *ob, int line_number, int start_pc)
     }
 }
 
+/* 生成字节码 */
 static void
 generate_code(OpcodeBuf *ob, int line_number, DVM_Opcode code, ...)
 {
@@ -456,6 +457,7 @@ generate_binary_expression(DVM_Executable *exe, Block *block,
                                                     ->type->basic_type));
 }
 
+/* 获取一个标签，这里的标签是指标签对应表的下标 */
 static int
 get_label(OpcodeBuf *ob)
 {
@@ -473,6 +475,7 @@ get_label(OpcodeBuf *ob)
     return ret;
 }
 
+/* 计算地址，然后将地址存入标签对应表 */
 static void
 set_label(OpcodeBuf *ob, int label)
 {

@@ -1,5 +1,7 @@
 #include "share.h"
 
+/* 描绘了什么指令处理什么样的操作数 */
+/* b代表一个字节的整数，s代表两个字节的整数，p代表常量池的索引值*/
 OpcodeInfo dvm_opcode_info[] = {
     {"dummy", "", 0},
     {"push_int_1byte", "b", 1},
